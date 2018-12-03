@@ -4,6 +4,10 @@ const app = module.exports = new Koa();
 
 app.use(bodyParser());
 
+const Router = require('./router') 
+app.use(Router.routes())
+  .use(Router.allowedMethods());
+
 //start listen to port
 const port = 3001;
 if (!module.parent) {

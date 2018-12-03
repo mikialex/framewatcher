@@ -4,13 +4,15 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node ./src/server/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "koa": "^2.6.2",
     "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
     "pixelmatch": "^4.0.2",
     "pngjs": "^3.3.3",
     "puppeteer": "^1.11.0"

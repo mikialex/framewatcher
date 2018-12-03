@@ -5,7 +5,7 @@ async function findAllTestConfig() {
 }
 
 function logTestConfig(config) {
-  
+  console.log(config);
 }
 
 async function runTest(config) {
@@ -30,4 +30,23 @@ async function runAllTest() {
     await runTest(config);
   }
 }
+
+async function loadFrameWatcherConfig(rootConfigPath){
+  return {};
+}
+
+async function loadTestsFromRootConfig(config) {
+  
+}
+
+class FrameWatcher {
+  static async loadTests(ctx) {
+    const rootConfigPath = ctx.query.rootPath;
+    const config = await loadFrameWatcherConfig(rootConfigPath);
+    const tests = await loadTestsFromRootConfig(config);
+    ctx.body = tests;
+  }
+}
+
+module.exports = FrameWatcher;
 
