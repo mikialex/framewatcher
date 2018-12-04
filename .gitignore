@@ -2,5 +2,6 @@ yarn.lock
 
 node_modules/
 
-workspace/result/data
-workspace/spec/data
+workspace/result/
+workspace/spec/
+workspace/diff/
