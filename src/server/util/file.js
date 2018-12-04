@@ -9,10 +9,13 @@ function loadPNGFromFile(path) {
   })
 }
 
-function loadAllFileInFolderAsStringList(dirPath) {
+function loadAllFileInFolderAsStringList(dirPath, reg) {
   const fileList = fs.readdirSync(dirPath);
   const result = [];
   fileList.forEach(file => {
+    if (!reg.test(file)) {
+      return;
+    }
     const filePath = dirPath + '/' + file;
     if (fs.statSync(filePath).isFile()) {
       const fileContent = fs.readFileSync(filePath, "utf-8");

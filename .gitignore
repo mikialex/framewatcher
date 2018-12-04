@@ -5,3 +5,7 @@ node_modules/
 workspace/result/
 workspace/spec/
 workspace/diff/
+workspace/testsrc/
+
+.nyc_output
+coverage

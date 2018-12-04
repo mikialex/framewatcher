@@ -33,30 +33,57 @@ async function saveScreenShot(page, pathToSave) {
     type: 'png',
   });
 }
-var testToRun;
-async function runTest(url, imageDistDirPath, testScript) {
+
+async function injectBasicUtil(page) {
+    // expose log function for log in node from browser
+    await page.exposeFunction('frameLog', (log) => {
+      console.log('frameLog: ' + log);
+    })
+}
+
+async function preFetchTestDescription(testScript){
   const browser = await createPuppeteerBrowser();
   const page = await createPage(browser);
-  await gotoURL(page, url);
-
-  // expose log function for log in node from browser
-  await page.exposeFunction('frameLog', (log) => {
-    console.log('frameLog: ' + log);
-  })
+  await gotoURL(page, global.mockServerURL);
+  injectBasicUtil(page);
 
   // add test collection function in browerser env
   await page.evaluate(() => {
     window.describe = function (testName, testFunc) {
+      frameLog('des');
+      window.testName = testName;
       window.testStr = testFunc.toString();
-      frameLog(testStr)
     }
   })
 
+  let descrpition;
+  let functionStr;
   // expose a function to get test decrpition from browser env
-  await page.exposeFunction('loadTestOver', (testFunctionStr) => {
-    testToRun = testFunctionStr;
+  await page.exposeFunction('loadTestOver', (testDescription, testFunctionStr) => {
+    descrpition = testDescription;
+    functionStr = testFunctionStr;
   })
 
+  await page.evaluate(testScript);
+  await page.evaluate(() => {
+    loadTestOver(window.testName, window.testStr);
+  });
+
+  await browser.close();
+
+  return {
+    descrpition, functionStr, testScript
+  }
+}
+
+async function runTest(testScript) {
+  const browser = await createPuppeteerBrowser();
+  const page = await createPage(browser);
+  injectBasicUtil(page);
+  await page.coverage.startJSCoverage({ reportAnonymousScripts: true });
+  await gotoURL(page, global.mockServerURL);
+
+  const imageDistDirPath = global.resultFolder
   // expose imageDiff prediction 
   await page.exposeFunction('expectFrame', async (frameName) => {
     const filePath = imageDistDirPath + frameName + '.png';
@@ -64,13 +91,19 @@ async function runTest(url, imageDistDirPath, testScript) {
     await saveScreenShot(page, filePath);
   })
 
-  // start load test
-  await page.evaluate(testScript);
-  await page.evaluate(() => {
-    loadTestOver(window.testStr);
-  });
-  console.log(testToRun);
-  await page.evaluate('(' + testToRun + ')()');
+  const testInfo = await preFetchTestDescription(testScript);
+
+
+  console.log(testInfo);
+  await page.evaluate('(' + testInfo.functionStr + ')()');
+  // await page.addScriptTag({content: '(' + testInfo.functionStr + ')()'})
+  const jsCoverage = await page.coverage.stopJSCoverage();
+
+  const pti = require('puppeteer-to-istanbul')
+  pti.write(jsCoverage)
+
+  await browser.close();
+  console.log('test over');
 }
 
 
