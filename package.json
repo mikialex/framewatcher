@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "node ./src/server/index.js ",
-    "testall": "node ./src/server/runall.js "
+    "testall": "node ./src/server/runall.js ",
+    "coverage": "nyc report --reporter=html",
+    "preparetest": "npx webpack --config ./workspace/webpack.config.js"
   },
   "author": "",
   "license": "ISC",
@@ -20,7 +22,13 @@
     "pngjs": "^3.3.3",
     "puppeteer": "^1.11.0",
     "puppeteer-to-istanbul": "^1.2.2",
+    "ts-loader": "^5.3.1",
+    "typescript": "^3.2.1",
     "vue": "^2.5.17",
-    "vue-cli": "^2.9.6"
+    "vue-cli": "^2.9.6",
+    "webpack": "^4.27.1"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.1.2"
   }
 }

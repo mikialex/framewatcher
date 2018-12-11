@@ -39,64 +39,84 @@ async function injectBasicUtil(page) {
     await page.exposeFunction('frameLog', (log) => {
       console.log('frameLog: ' + log);
     })
+  
 }
 
 async function preFetchTestDescription(testScript){
   const browser = await createPuppeteerBrowser();
   const page = await createPage(browser);
-  await gotoURL(page, global.mockServerURL);
   injectBasicUtil(page);
-
-  // add test collection function in browerser env
-  await page.evaluate(() => {
-    window.describe = function (testName, testFunc) {
-      frameLog('des');
-      window.testName = testName;
-      window.testStr = testFunc.toString();
-    }
-  })
 
   let descrpition;
   let functionStr;
-  // expose a function to get test decrpition from browser env
-  await page.exposeFunction('loadTestOver', (testDescription, testFunctionStr) => {
-    descrpition = testDescription;
-    functionStr = testFunctionStr;
+  // add test collection function in browerser env
+  await page.exposeFunction('exe', (testName, func) => {
+    descrpition = testName;
+    functionStr = func;
   })
-
-  await page.evaluate(testScript);
-  await page.evaluate(() => {
-    loadTestOver(window.testName, window.testStr);
-  });
-
+  await gotoURL(page, global.mockServerURL);
   await browser.close();
-
   return {
     descrpition, functionStr, testScript
   }
 }
 
+function createEvalTestStr(str) {
+  return `
+    (
+      ${str}
+    )()
+  `
+}
+
+async function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  })
+}
+
+
 async function runTest(testScript) {
   const browser = await createPuppeteerBrowser();
   const page = await createPage(browser);
   injectBasicUtil(page);
+
   await page.coverage.startJSCoverage({ reportAnonymousScripts: true });
-  await gotoURL(page, global.mockServerURL);
 
   const imageDistDirPath = global.resultFolder
   // expose imageDiff prediction 
   await page.exposeFunction('expectFrame', async (frameName) => {
     const filePath = imageDistDirPath + frameName + '.png';
     console.log(`wirte image file to: ${filePath}`);
-    await saveScreenShot(page, filePath);
+    try {
+      await saveScreenShot(page, filePath);
+    } catch (error) {
+      console.log('save error:\n' + error)
+    }
   })
 
-  const testInfo = await preFetchTestDescription(testScript);
+  const testWaiter = new Promise(async (resolve) => {
+    await page.exposeFunction('finishTest', async (frameName) => {
+      resolve();
+    })
+  })
 
+  await gotoURL(page, global.mockServerURL);
+  const t = require('fs').readFileSync('/Users/mikialex/Desktop/framewatcher/workspace/html/dist/artglwebpack.js', "utf-8");
+  // await page.addScriptTag({url:'http://127.0.0.1:8081/dist/artglwebpack.js'});
+  await page.evaluate(t);
+  await testWaiter;
 
-  console.log(testInfo);
-  await page.evaluate('(' + testInfo.functionStr + ')()');
-  // await page.addScriptTag({content: '(' + testInfo.functionStr + ')()'})
+  // console.log(testInfo);
+  // const test = createEvalTestStr(testInfo.functionStr);
+  // try {
+  //   await page.evaluate(test);
+  // } catch (error) {
+  //   console.log(`test failed beacuse of some error:\n` + error);
+  // }
+
   const jsCoverage = await page.coverage.stopJSCoverage();
 
   const pti = require('puppeteer-to-istanbul')
