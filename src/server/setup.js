@@ -28,12 +28,17 @@ function setupGlobal() {
   global.diffResultFolder = global.workspaceRoot + '/diff/';
   global.resultFolder = global.workspaceRoot + '/result/';
   global.specFolder = global.workspaceRoot + '/spec/';
-  global.testDesFolder = global.workspaceRoot + '/test/';
+  global.testDesFolder = path.resolve(currentAbsolutePath, rootConfig.projectRoot);
 }
 
-const testFileReg = /fw.js$/
+const testFileReg = /fw.ts$/
 function loadAlltest() {
   const testFileList = fileUtil.loadAllFileInFolderAsStringList(global.testDesFolder, testFileReg);
+  if (testFileList.length === 0) {
+    console.log(`no test file found in project folder: ${global.testDesFolder}`);
+    console.log(`stop and quit`);
+    process.abort();
+  }
   global.testFileList = testFileList;
   return testFileList;
 }

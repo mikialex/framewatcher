@@ -1,3 +1,4 @@
 {
-  "workSpaceRoot": "./"
+  "workSpaceRoot": "./",
+  "projectRoot": "./testsrc"
 }
