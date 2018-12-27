@@ -42,43 +42,7 @@ async function injectBasicUtil(page) {
   
 }
 
-async function preFetchTestDescription(testScript){
-  const browser = await createPuppeteerBrowser();
-  const page = await createPage(browser);
-  injectBasicUtil(page);
-
-  let descrpition;
-  let functionStr;
-  // add test collection function in browerser env
-  await page.exposeFunction('exe', (testName, func) => {
-    descrpition = testName;
-    functionStr = func;
-  })
-  await gotoURL(page, global.mockServerURL);
-  await browser.close();
-  return {
-    descrpition, functionStr, testScript
-  }
-}
-
-function createEvalTestStr(str) {
-  return `
-    (
-      ${str}
-    )()
-  `
-}
-
-async function wait(ms) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  })
-}
-
-
-async function runTest(testScript) {
+async function runTest() {
   const browser = await createPuppeteerBrowser();
   const page = await createPage(browser);
   injectBasicUtil(page);
@@ -105,17 +69,8 @@ async function runTest(testScript) {
 
   await gotoURL(page, global.mockServerURL);
   const t = require('fs').readFileSync('/Users/mikialex/Desktop/framewatcher/workspace/html/dist/artglwebpack.js', "utf-8");
-  // await page.addScriptTag({url:'http://127.0.0.1:8081/dist/artglwebpack.js'});
   await page.evaluate(t);
   await testWaiter;
-
-  // console.log(testInfo);
-  // const test = createEvalTestStr(testInfo.functionStr);
-  // try {
-  //   await page.evaluate(test);
-  // } catch (error) {
-  //   console.log(`test failed beacuse of some error:\n` + error);
-  // }
 
   const jsCoverage = await page.coverage.stopJSCoverage();
 

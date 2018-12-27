@@ -2,6 +2,23 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const app = module.exports = new Koa();
 
+const Server = require('socket.io');
+const io = new Server();
+// io.attach(app, {
+//   pingInterval: 10000,
+//   pingTimeout: 5000,
+//   cookie: false
+// });
+
+io.on('connection', function(socket){
+  console.log('connect');
+  // socket.on('chat message', function(msg){
+  //   console.log('message: ' + msg);
+  // });
+});
+
+io.listen(3002)
+
 require('./setup').createMockServer();
 require('./setup').setupGlobal();
 require('./setup').loadAlltest();

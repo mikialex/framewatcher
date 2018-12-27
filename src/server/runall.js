@@ -5,13 +5,8 @@ require('./setup').loadAlltest();
 const ptrr = require('./frame/puppeteer');
 
 async function runAllTest() {
-  for (let i = 0; i < global.testFileList.length; i++) {
-    const config = global.testFileList[i];
-    await ptrr.runTest(config.fileContent);
-  }
-
+  await ptrr.runTest();
   process.exit();
-
 }
 
 runAllTest();

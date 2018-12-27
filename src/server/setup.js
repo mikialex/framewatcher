@@ -37,7 +37,7 @@ function loadAlltest() {
   if (testFileList.length === 0) {
     console.log(`no test file found in project folder: ${global.testDesFolder}`);
     console.log(`stop and quit`);
-    process.abort();
+    process.exit(0);
   }
   global.testFileList = testFileList;
   return testFileList;

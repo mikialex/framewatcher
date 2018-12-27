@@ -9,7 +9,7 @@ function packTestFiles() {
   });
 }
 
-const testFileInnerName = 'framewatcherTestPack.js'
+const testFileInnerName = 'framewatcherTestPack.js' 
 function generateWebpackConfig(entryList, ) {
   const webpackConfig = {
     mode: 'development',
